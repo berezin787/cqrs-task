@@ -1,0 +1,33 @@
+services:
+  database:
+    image: postgres:15.3-alpine
+    restart: always
+    container_name: database
+    environment:
+      - POSTGRES_USER=db_user
+      - POSTGRES_PASSWORD=db_password
+      - POSTGRES_DB=cqrs_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  cars-api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: development
+    container_name: cars-api
+    command: npm run start:dev
+    env_file:
+      - ./.env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/usr/src/app/
+    depends_on:
+      - database
+
+volumes:
+  db:
+    driver: local
